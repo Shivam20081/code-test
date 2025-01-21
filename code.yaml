@@ -27,8 +27,8 @@ steps:
 
 - script: |
     cd android
-    gradlew assembleDebug
-    gradlew assembleRelease
+    ./gradlew assembleDebug
+    ./gradlew assembleRelease
   displayName: 'Build Release APK and App Bundle'
 
 - task: AzureFileCopy@4
