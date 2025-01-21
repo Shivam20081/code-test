@@ -7,15 +7,23 @@ pool:
   vmImage: 'macos-latest'
 
 variables:
-  KEYSTORE_PATH: $(Build.SourcesDirectory)keystore.keystore
+  # Keystore and password variables
+  KEYSTORE_PATH: $(Build.SourcesDirectory)/keystore.keystore
+  KEYSTORE_PASSWORD: $(KEYSTORE_PASSWORD)  # Make sure this is set as a secret variable
+  KEY_ALIAS: $(KEY_ALIAS)  # Make sure this is set as a secret variable
+  KEY_PASSWORD: $(KEY_PASSWORD)  # Make sure this is set as a secret variable
 
 steps:
   # Checkout the code from the repo
   - checkout: self
 
-  # Build the app using the secure passwords
+  # Install dependencies
   - script: |
       npm install
+    displayName: 'Install Dependencies'
+
+  # Build APK and App Bundle (AAB) with signing information
+  - script: |
       cd android
       ./gradlew assembleRelease \
         -Pandroid.injected.signing.store.file=$(KEYSTORE_PATH) \
@@ -23,7 +31,7 @@ steps:
         -Pandroid.injected.signing.key.alias=$(KEY_ALIAS) \
         -Pandroid.injected.signing.key.password=$(KEY_PASSWORD)
     displayName: 'Build APK and App Bundle'
-
+    
   # Publish artifacts
   - task: PublishBuildArtifacts@1
     inputs:
