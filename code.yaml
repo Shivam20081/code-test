@@ -7,7 +7,7 @@ pool:
   vmImage: 'macos-latest'
 
 variables:
-  KEYSTORE_PATH: $(Pipeline.Workspace)/my-release-key.keystore
+  KEYSTORE_PATH: $(Pipeline.Workspace)/keystore.keystore
 
 steps:
   # Download the keystore from Secure Files
