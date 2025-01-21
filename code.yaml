@@ -18,34 +18,31 @@ steps:
 # Install dependencies
 - task: NodeTool@0
   inputs:
-    versionSpec: '16.x'
+    versionSpec: '22.x'
   displayName: 'Install Node.js'
 
-- task: Npm@1
-  inputs:
-    command: 'install'
-  displayName: 'Install npm packages'
 
 # Install React Native CLI
 - script: |
+    npm install
     npm install -g react-native-cli
   displayName: 'Install React Native CLI'
 
 # Set up environment variables for the keystore
-- script: |
-    echo "ANDROID_KEYSTORE_PASSWORD=$(ANDROID_KEYSTORE_PASSWORD)" >> $(Build.SourcesDirectory)/android/gradle.properties
-    echo "ANDROID_KEY_PASSWORD=$(ANDROID_KEY_PASSWORD)" >> $(Build.SourcesDirectory)/android/gradle.properties
-    echo "ANDROID_KEYSTORE_ALIAS=$(ANDROID_KEYSTORE_ALIAS)" >> $(Build.SourcesDirectory)/android/gradle.properties
-    echo "ANDROID_KEY_ALIAS=$(ANDROID_KEY_ALIAS)" >> $(Build.SourcesDirectory)/android/gradle.properties
-  displayName: 'Set Keystore Environment Variables'
+# - script: |
+#     echo "ANDROID_KEYSTORE_PASSWORD=$(ANDROID_KEYSTORE_PASSWORD)" >> $(Build.SourcesDirectory)/android/gradle.properties
+#     echo "ANDROID_KEY_PASSWORD=$(ANDROID_KEY_PASSWORD)" >> $(Build.SourcesDirectory)/android/gradle.properties
+#     echo "ANDROID_KEYSTORE_ALIAS=$(ANDROID_KEYSTORE_ALIAS)" >> $(Build.SourcesDirectory)/android/gradle.properties
+#     echo "ANDROID_KEY_ALIAS=$(ANDROID_KEY_ALIAS)" >> $(Build.SourcesDirectory)/android/gradle.properties
+#   displayName: 'Set Keystore Environment Variables'
 
 # Copy the keystore file to the right location
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: $(Build.SourcesDirectory)
-    Contents: 'my-release-key.keystore'
-    TargetFolder: $(Build.SourcesDirectory)/android/app
-  displayName: 'Copy Keystore to Android App'
+# - task: CopyFiles@2
+#   inputs:
+#     SourceFolder: $(Build.SourcesDirectory)
+#     Contents: 'my-release-key.keystore'
+#     TargetFolder: $(Build.SourcesDirectory)/android/app
+#   displayName: 'Copy Keystore to Android App'
 
 # Build APK and App Bundle
 - script: |
