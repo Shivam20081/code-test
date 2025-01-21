@@ -1,57 +1,36 @@
 trigger:
-- main  # Define which branch to trigger the pipeline on, e.g., main branch
+- main
 
 pool:
-  vmImage: 'ubuntu-latest'  # You can use a Windows image like 'windows-latest' for Windows-based builds
+  vmImage: 'ubuntu-latest'
 
 variables:
-  ANDROID_KEYSTORE_PASSWORD: $(ANDROID_KEYSTORE_PASSWORD)  # Set in pipeline or variable group
-  ANDROID_KEY_PASSWORD: $(ANDROID_KEY_PASSWORD)  # Set in pipeline or variable group
-  ANDROID_KEYSTORE_ALIAS: $(ANDROID_KEYSTORE_ALIAS)  # Set in pipeline or variable group
-  ANDROID_KEY_ALIAS: $(ANDROID_KEY_ALIAS)  # Set in pipeline or variable group
-  ANDROID_KEYSTORE_PATH: '$(Build.SourcesDirectory)/android/app/my-release-key.keystore'  # Path to your keystore
-  AZURE_SUBSCRIPTION: $(AZURE_SUBSCRIPTION)  # Your Azure subscription service connection
-  STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)  # Your Azure Storage Account name
-  CONTAINER_NAME: $(CONTAINER_NAME)  # Your Azure Blob container name
+  ANDROID_KEYSTORE_PASSWORD: $(ANDROID_KEYSTORE_PASSWORD)
+  ANDROID_KEY_PASSWORD: $(ANDROID_KEY_PASSWORD)
+  ANDROID_KEYSTORE_ALIAS: $(ANDROID_KEYSTORE_ALIAS)
+  ANDROID_KEY_ALIAS: $(ANDROID_KEY_ALIAS)
+  ANDROID_KEYSTORE_PATH: '$(Build.SourcesDirectory)/android/app/my-release-key.keystore'
+  AZURE_SUBSCRIPTION: $(AZURE_SUBSCRIPTION)
+  STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)
+  CONTAINER_NAME: $(CONTAINER_NAME)
 
 steps:
-# Install dependencies
 - task: NodeTool@0
   inputs:
     versionSpec: '22.x'
   displayName: 'Install Node.js'
 
-
-# Install React Native CLI
 - script: |
     npm install
     npm install -g react-native-cli
   displayName: 'Install React Native CLI'
 
-# Set up environment variables for the keystore
-# - script: |
-#     echo "ANDROID_KEYSTORE_PASSWORD=$(ANDROID_KEYSTORE_PASSWORD)" >> $(Build.SourcesDirectory)/android/gradle.properties
-#     echo "ANDROID_KEY_PASSWORD=$(ANDROID_KEY_PASSWORD)" >> $(Build.SourcesDirectory)/android/gradle.properties
-#     echo "ANDROID_KEYSTORE_ALIAS=$(ANDROID_KEYSTORE_ALIAS)" >> $(Build.SourcesDirectory)/android/gradle.properties
-#     echo "ANDROID_KEY_ALIAS=$(ANDROID_KEY_ALIAS)" >> $(Build.SourcesDirectory)/android/gradle.properties
-#   displayName: 'Set Keystore Environment Variables'
-
-# Copy the keystore file to the right location
-# - task: CopyFiles@2
-#   inputs:
-#     SourceFolder: $(Build.SourcesDirectory)
-#     Contents: 'my-release-key.keystore'
-#     TargetFolder: $(Build.SourcesDirectory)/android/app
-#   displayName: 'Copy Keystore to Android App'
-
-# Build APK and App Bundle
 - script: |
     cd android
-    ./gradlew assembleRelease
-    ./gradlew bundleRelease
+    gradlew assembleDebug
+    gradlew assembleRelease
   displayName: 'Build Release APK and App Bundle'
 
-# Upload APK and App Bundle to Azure Storage
 - task: AzureFileCopy@4
   inputs:
     SourcePath: '$(System.DefaultWorkingDirectory)/android/app/build/outputs/'
