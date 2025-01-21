@@ -55,7 +55,7 @@ steps:
 - task: AzureFileCopy@4
   inputs:
     SourcePath: '$(System.DefaultWorkingDirectory)/android/app/build/outputs/'
-    azureSubscription: $(AZURE_SUBSCRIPTION)
+    azureSubscription: subscription
     Destination: 'AzureBlob'
     storage: $(STORAGE_ACCOUNT)
     ContainerName: $(CONTAINER_NAME)
