@@ -7,13 +7,11 @@ pool:
   vmImage: 'macos-latest'
 
 variables:
-  KEYSTORE_PATH: $(Pipeline.Workspace)/keystore.keystore
+  KEYSTORE_PATH: $(Build.SourcesDirectory)keystore.keystore
 
 steps:
-  # Download the keystore from Secure Files
-  - task: DownloadSecureFile@1
-    inputs:
-      secureFile: 'my-release-key.keystore'
+  # Checkout the code from the repo
+  - checkout: self
 
   # Build the app using the secure passwords
   - script: |
