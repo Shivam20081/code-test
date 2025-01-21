@@ -26,10 +26,13 @@ steps:
   displayName: 'Install React Native CLI'
 
 - script: |
+    chmod +x android/gradlew
+  displayName: 'Make gradlew executable'
+
+- script: |
     cd android
-    ./gradlew assembleDebug
-    ./gradlew assembleRelease
-  displayName: 'Build Release APK and App Bundle'
+    ./gradlew assembleRelease --warning-mode all
+  displayName: 'Build Release APK and App Bundle with Warnings'
 
 - task: AzureFileCopy@4
   inputs:
