@@ -1,67 +1,43 @@
-# Gradle
-# Build your Java project and run tests with Gradle using a Gradle wrapper script.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
 trigger:
-- master
+  branches:
+    include:
+      - main
 
 pool:
-  vmImage: 'macOS-10.14'
+  vmImage: 'macos-latest'
 
 variables:
-  - group: AndroidKeystore
+  KEYSTORE_PATH: $(Pipeline.Workspace)/my-release-key.keystore
 
 steps:
-- task: NodeTool@0
-  displayName: 'Install Node'
-  inputs:
-    versionSpec: '12.16.1'
+  # Download the keystore from Secure Files
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'my-release-key.keystore'
 
-- script: npm install
-  workingDirectory: src
-  displayName: 'Install node dependencies'
+  # Build the app using the secure passwords
+  - script: |
+      npm install
+      cd android
+      ./gradlew assembleRelease \
+        -Pandroid.injected.signing.store.file=$(KEYSTORE_PATH) \
+        -Pandroid.injected.signing.store.password=$(KEYSTORE_PASSWORD) \
+        -Pandroid.injected.signing.key.alias=$(KEY_ALIAS) \
+        -Pandroid.injected.signing.key.password=$(KEY_PASSWORD)
+    displayName: 'Build APK and App Bundle'
 
-- task: Gradle@2
-  inputs:
-    workingDirectory: 'src/android'
-    gradleWrapperFile: 'src/android/gradlew'
-    gradleOptions: '-Xmx3072m'
-    publishJUnitResults: false
-    testResultsFiles: '**/TEST-*.xml'
-    tasks: 'assembleRelease'
+  # Publish artifacts
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: '$(System.DefaultWorkingDirectory)/android/app/build/outputs/'
+      artifactName: 'AppArtifacts'
 
-- task: AndroidSigning@2
-  inputs:
-    apkFiles: '**/*.apk'
-    jarsign: true
-    jarsignerKeystoreFile: 'android.keystore'
-    jarsignerKeystorePassword: '$(jarsignerKeystorePassword)'
-    jarsignerKeystoreAlias: 'react-native-pipeline-key'
-    jarsignerKeyPassword: '$(jarsignerKeyPassword)'
-    zipalign: true
-
-- script: mv src/android/app/build/outputs/apk/release/app-release-unsigned.apk ReactNativePipeline$(Build.BuildNumber).apk
-  displayName: 'Rename apk'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: ReactNativePipeline$(Build.BuildNumber).apk
-    artifactName: drop
-    publishLocation: 'container'
-
-- task: AppCenterDistribute@3
-  displayName: "Create a release on App Center"
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-  inputs:
-    serverEndpoint: 'app-center'
-    appSlug: 'stafford.williams/ReactNativePipeline-Android'
-    appFile: 'ReactNativePipeline$(Build.BuildNumber).apk'
-    releaseNotesOption: 'input'
-    releaseNotesInput: |
-      $(Build.SourceVersionMessage)
-      
-      latest source: '$(Build.SourceVersion)'
-      
-      An automated release from Azure DevOps
-    destinationType: 'groups'
+  # Upload APK and App Bundle to Azure Storage
+  - task: AzureFileCopy@4
+    inputs:
+      SourcePath: '$(System.DefaultWorkingDirectory)/android/app/build/outputs/'
+      azureSubscription: $(AZURE_SUBSCRIPTION)
+      Destination: 'AzureBlob'
+      storage: $(STORAGE_ACCOUNT)
+      ContainerName: $(CONTAINER_NAME)
+      BlobPrefix: 'react-native-builds/'
