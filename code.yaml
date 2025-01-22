@@ -18,11 +18,12 @@ steps:
 - task: DownloadSecureFile@1
   name: downloadKeystore
   inputs:
-    secureFile: 'my-upload-key.keystore'  # Name of the secure file to be downloaded
+    secureFile: 'my-upload-key.keystore'
   displayName: 'Download Keystore File'
 
 - script: |
     ls
+    pwd
   displayName: ' build'
 
 - task: Gradle@3
