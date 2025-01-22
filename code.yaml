@@ -29,6 +29,15 @@ steps:
     javaHomeOption: 'JDKVersion'
     gradleOptions: '-Xmx3072m'
 
+- task: AndroidSigning@3
+  inputs:
+    apkFiles: '**/*.apk'
+    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'
+    apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
+    apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
+    apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
+    zipalign: false
+
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish APK to artifacts'
