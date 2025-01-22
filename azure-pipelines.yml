@@ -21,8 +21,8 @@ steps:
 
 - task: Gradle@3
   inputs:
-    gradleWrapperFile: 'src/android/gradlew'
-    workingDirectory: 'src/android'
+    gradleWrapperFile: 'gradlew'  # Adjusted path if gradlew is in the root directory
+    workingDirectory: 'src/android'  # Ensure this is the correct directory
     options: '-Xmx3072m'
     tasks: 'assembleRelease'
     publishJUnitResults: true
@@ -30,6 +30,7 @@ steps:
     javaHomeOption: 'JDKVersion'
     sonarQubeRunAnalysis: false
     spotBugsAnalysis: false
+
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish APK to artifacts'
