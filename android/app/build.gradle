@@ -79,7 +79,7 @@ android {
     namespace "com.demo"
     defaultConfig {
         applicationId "com.demo"
-        minSdkVersion rootProject.ext.minSdkVersionf
+        minSdkVersion rootProject.ext.minSdkVersion
         versionCode 1
         versionName "1.0"
     }
