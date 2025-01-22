@@ -26,11 +26,8 @@ steps:
   displayName: 'Install React Native CLI'
 
 - script: |
-    chmod +x android/gradlew
-  displayName: 'Make gradlew executable'
-
-- script: |
     cd android
+    ./gradlew clean
     ./gradlew assembleRelease --warning-mode all
   displayName: 'Build Release APK and App Bundle with Warnings'
 
