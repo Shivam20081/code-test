@@ -30,40 +30,45 @@ steps:
     secureFile: 'my-upload-key.keystore'  # Name of the secure file to be downloaded
   displayName: 'Download Keystore File'
 
-- task: AndroidSigning@3
-  inputs:
-    apkFiles: '**/*.apk'
-    apksignerKeystoreFile: '$(Agent.TempDirectory)/_temp/my-upload-key.keystore'  # Path to downloaded file
-    apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
-    apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
-    apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
-    zipalign: false
+- script: |
+    ls
+  displayName: ' build'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish APK to artifacts'
-  inputs:
-    PathtoPublish: 'android/app/build/outputs/apk/release'
-    ArtifactName: 'android'
-    publishLocation: 'Container'
 
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: 'subscription'  # Replace with your Azure subscription service connection
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Ensure the Azure CLI variables are passed correctly
-      STORAGE_ACCOUNT='your-storage-account'  # Replace with your Azure Storage Account Name
-      CONTAINER_NAME='your-container-name'    # Replace with your Azure Blob Container Name
+# - task: AndroidSigning@3
+#   inputs:
+#     apkFiles: '**/*.apk'
+#     apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  # Path to downloaded file
+#     apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
+#     apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
+#     apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
+#     zipalign: false
 
-      # Check if the variables are set correctly
-      echo "STORAGE_ACCOUNT: $STORAGE_ACCOUNT"
-      echo "CONTAINER_NAME: $CONTAINER_NAME"
+# - task: PublishBuildArtifacts@1
+#   displayName: 'Publish APK to artifacts'
+#   inputs:
+#     PathtoPublish: 'android/app/build/outputs/apk/release'
+#     ArtifactName: 'android'
+#     publishLocation: 'Container'
 
-      # Upload only .apk files to Azure Blob Storage using Azure CLI
-      az storage blob upload-batch \
-        --account-name $STORAGE_ACCOUNT \
-        --destination $CONTAINER_NAME/react-native-builds/ \
-        --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
-        --pattern '*.apk'  # Upload only .apk files
-  displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
+# - task: AzureCLI@2
+#   inputs:
+#     azureSubscription: 'subscription'  # Replace with your Azure subscription service connection
+#     scriptType: 'bash'
+#     scriptLocation: 'inlineScript'
+#     inlineScript: |
+#       # Ensure the Azure CLI variables are passed correctly
+#       STORAGE_ACCOUNT='your-storage-account'  # Replace with your Azure Storage Account Name
+#       CONTAINER_NAME='your-container-name'    # Replace with your Azure Blob Container Name
+
+#       # Check if the variables are set correctly
+#       echo "STORAGE_ACCOUNT: $STORAGE_ACCOUNT"
+#       echo "CONTAINER_NAME: $CONTAINER_NAME"
+
+#       # Upload only .apk files to Azure Blob Storage using Azure CLI
+#       az storage blob upload-batch \
+#         --account-name $STORAGE_ACCOUNT \
+#         --destination $CONTAINER_NAME/react-native-builds/ \
+#         --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
+#         --pattern '*.apk'  # Upload only .apk files
+#   displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
