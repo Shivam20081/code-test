@@ -22,6 +22,8 @@ steps:
   displayName: 'Download Keystore File'
 
 - script: |
+    echo Installing $(downloadKeystore.secureFilePath) to the trusted CA directory...
+    cp $(downloadKeystore.secureFilePath) ./
     ls
     pwd
   displayName: ' build'
