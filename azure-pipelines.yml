@@ -7,7 +7,7 @@ trigger:
 - main
 
 pool:
-  vmImage: macos-latest
+  vmImage: 'macos-latest'
 
 steps:
 - task: NodeTool@0
@@ -37,21 +37,12 @@ steps:
     ArtifactName: 'android'
     publishLocation: 'Container'
 
-- task: AzureCLI@2
+- task: AzureFileCopy@4
   inputs:
+    SourcePath: '$(System.DefaultWorkingDirectory)/android/app/build/outputs/'
     azureSubscription: 'subscription'  # Replace with your Azure subscription service connection
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # Upload APK and App Bundle to Azure Blob Storage
-      az storage blob upload-batch \
-        --account-name $(STORAGE_ACCOUNT) \
-        --destination $(CONTAINER_NAME)/react-native-builds/ \
-        --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/ \
-        --pattern '*.apk'  # Upload .apk files
-      az storage blob upload-batch \
-        --account-name $(STORAGE_ACCOUNT) \
-        --destination $(CONTAINER_NAME)/react-native-builds/ \
-        --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/ \
-        --pattern '*.aab'  # Upload .aab files if present
-  displayName: 'Upload APK and App Bundle to Azure Blob Storage using Azure CLI'
+    Destination: 'AzureBlob'
+    storage: '$(STORAGE_ACCOUNT)'  # Replace with your Azure Storage account name
+    ContainerName: '$(CONTAINER_NAME)'  # Replace with the Azure Blob container name
+    BlobPrefix: 'react-native-builds/'  # Prefix to categorize builds
+  displayName: 'Upload APK and App Bundle to Azure Blob Storage'
