@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'macos-latest'
 
 variables:
   ANDROID_KEYSTORE_PASSWORD: $(ANDROID_KEYSTORE_PASSWORD)
@@ -26,6 +26,8 @@ steps:
   displayName: 'Install React Native CLI'
 
 - script: |
+    export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+    echo "JAVA_HOME is set to $JAVA_HOME"
     cd android
     ./gradlew clean
     ./gradlew assembleRelease --warning-mode all
