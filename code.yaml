@@ -41,7 +41,7 @@ steps:
 - task: AndroidSigning@3
   inputs:
     apkFiles: '**/*.apk'
-    apksignerKeystoreFile: 'my-upload-key.keystore'  # Path to downloaded file
+    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  # Path to downloaded file
     apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
     apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
     apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
