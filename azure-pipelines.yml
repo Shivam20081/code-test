@@ -21,7 +21,7 @@ steps:
 
 - task: Gradle@3
   inputs:
-    gradleWrapperFile: 'gradlew'  # Adjusted path if gradlew is in the root directory
+    gradleWrapperFile: 'android'  # Adjusted path if gradlew is in the root directory
     workingDirectory: 'src/android'  # Ensure this is the correct directory
     options: '-Xmx3072m'
     tasks: 'assembleRelease'
