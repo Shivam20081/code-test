@@ -21,15 +21,13 @@ steps:
 
 - task: Gradle@3
   inputs:
-    gradleWrapperFile: 'android'  # Adjusted path if gradlew is in the root directory
-    workingDirectory: 'src/android'  # Ensure this is the correct directory
-    options: '-Xmx3072m'
+    gradleWrapperFile: 'android/gradlew'
+    workingDirectory: 'android/'
+    options: '-PversionName=$(Build.BuildNumber) -PversionCode=$(Build.BuildId)'
     tasks: 'assembleRelease'
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'
+    publishJUnitResults: false
     javaHomeOption: 'JDKVersion'
-    sonarQubeRunAnalysis: false
-    spotBugsAnalysis: false
+    gradleOptions: '-Xmx3072m'
 
 
 - task: PublishBuildArtifacts@1
