@@ -37,12 +37,24 @@ steps:
     ArtifactName: 'android'
     publishLocation: 'Container'
 
-- task: AzureFileCopy@4
+- task: AzureCLI@2
   inputs:
-    SourcePath: '$(System.DefaultWorkingDirectory)/android/app/build/outputs/'
     azureSubscription: 'subscription'  # Replace with your Azure subscription service connection
-    Destination: 'AzureBlob'
-    storage: '$(STORAGE_ACCOUNT)'  # Replace with your Azure Storage account name
-    ContainerName: '$(CONTAINER_NAME)'  # Replace with the Azure Blob container name
-    BlobPrefix: 'react-native-builds/'  # Prefix to categorize builds
-  displayName: 'Upload APK and App Bundle to Azure Blob Storage'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Ensure the Azure CLI variables are passed correctly
+      STORAGE_ACCOUNT=$(STORAGE_ACCOUNT)  # Azure Storage Account Name
+      CONTAINER_NAME=$(CONTAINER_NAME)    # Azure Blob Container Name
+
+      # Check if the variables are set correctly
+      echo "STORAGE_ACCOUNT: $STORAGE_ACCOUNT"
+      echo "CONTAINER_NAME: $CONTAINER_NAME"
+
+      # Upload only .apk files to Azure Blob Storage using Azure CLI
+      az storage blob upload-batch \
+        --account-name $STORAGE_ACCOUNT \
+        --destination $CONTAINER_NAME/react-native-builds/ \
+        --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
+        --pattern '*.apk'  # Upload only .apk files
+  displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
