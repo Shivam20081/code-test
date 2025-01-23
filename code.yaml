@@ -41,7 +41,7 @@ steps:
 - task: AndroidSigning@3
   inputs:
     apkFiles: '**/*.apk'
-    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  # Path to downloaded file
+    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  
     apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
     apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
     apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
@@ -56,7 +56,7 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'subscription'  # Replace with your Azure subscription service connection
+    azureSubscription: 'subscription'  
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
@@ -69,5 +69,5 @@ steps:
         --account-name $STORAGE_ACCOUNT \
         --destination $CONTAINER_NAME/react-native-builds/ \
         --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
-        --pattern '*.apk'  # Upload only .apk files
+        --pattern '*.apk'  
   displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
