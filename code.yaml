@@ -4,76 +4,106 @@ trigger:
 pool:
   vmImage: 'macos-latest'
 
-variables:
-  TIMESTAMP: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)] # Generate timestamp for unique APK names
-
 steps:
-# Step 1: Install Node.js
 - task: NodeTool@0
   inputs:
     versionSpec: '23.x'
   displayName: 'Install Node.js'
 
-# Step 2: Install dependencies
 - script: |
     npm install
-  displayName: 'Install Dependencies'
+  displayName: 'npm install and build'
 
-# Step 3: Download Secure Keystore File
+
 - task: DownloadSecureFile@1
   name: downloadKeystore
   inputs:
     secureFile: 'my-upload-key.keystore'
   displayName: 'Download Keystore File'
 
-# Step 4: Build APK
+# - task: DownloadSecureFile@1
+#   name: appleCertificate
+#   inputs:
+#     secureFile: 'Dist_Certificates_2.p12'
+#   displayName: 'Download appleCertificate File'
+
+# - task: DownloadSecureFile@1
+#   name: appleProvisioningProfile
+#   inputs:
+#     secureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
+#   displayName: 'Download appleProvisioningProfile File'
+
+
+# - task: InstallAppleCertificate@2 
+#   name: appleCertificate
+#   displayName: Install Apple Certificate
+#   inputs:
+#       certSecureFile: 'Dist_Certificates_2.p12'
+#       # certPwd: '$(AppleCertificatePassword)'
+#       keychain: 'temp'
+#       deleteCert: true
+
+# - task: InstallAppleProvisioningProfile@1
+#   name: appleProvisioningProfile
+#   displayName: 'Install Apple Provisioning Profile'
+#   inputs:
+#       provisioningProfileLocation: 'secureFiles'
+#       provProfileSecureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
+#       removeProfile: true
+# - task: CocoaPods@0
+#   displayName: 'Install CocoaPods'
+#   inputs:
+#       workingDirectory: 'ios'
+
 - script: |
     echo Installing $(downloadKeystore.secureFilePath) to the trusted CA directory...
-    cp $(downloadKeystore.secureFilePath) ./android/app/
-    cd android
-    ./gradlew assembleRelease -PversionName=$(Build.BuildNumber) -PversionCode=$(Build.BuildId)
-  displayName: 'Build APK'
+    cp $(downloadKeystore.secureFilePath) ./
+    cp $(appleCertificate.secureFilePath) ./
+    cp $(appleProvisioningProfile.secureFilePath) ./
+    ls
+    pwd
+  displayName: ' build'
 
-# Step 5: Rename APK with Timestamp
-- script: |
-    mkdir -p android/app/build/outputs/apk/release
-    mv android/app/build/outputs/apk/release/app-release.apk \
-       android/app/build/outputs/apk/release/app-release-$(TIMESTAMP).apk
-    echo "Generated APK: app-release-$(TIMESTAMP).apk"
-  displayName: 'Rename APK with Timestamp'
+- task: Gradle@3
+  inputs:
+    gradleWrapperFile: 'android/gradlew'
+    workingDirectory: 'android/'
+    options: '-PversionName=$(Build.BuildNumber) -PversionCode=$(Build.BuildId)'
+    tasks: 'assembleRelease'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    gradleOptions: '-Xmx3072m'
 
-# Step 6: Sign APK
 - task: AndroidSigning@3
   inputs:
-    apkFiles: 'android/app/build/outputs/apk/release/app-release-$(TIMESTAMP).apk'
-    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'
+    apkFiles: '**/*.apk'
+    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  
     apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
     apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
     apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
     zipalign: false
-  displayName: 'Sign APK'
 
-# Step 7: Publish APK Artifact
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish APK to artifacts'
   inputs:
     PathtoPublish: 'android/app/build/outputs/apk/release'
     ArtifactName: 'android'
     publishLocation: 'Container'
-  displayName: 'Publish APK as Build Artifact'
 
-# Step 8: Upload APK to Azure Blob Storage
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'subscription'
+    azureSubscription: 'subscription'  
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo "Uploading APK to Azure Blob Storage..."
-      az storage blob upload \
+      # Check if the variables are set correctly
+      echo "STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)"
+      echo "CONTAINER_NAME: $(CONTAINER_NAME)"
+
+      # Upload only .apk files to Azure Blob Storage using Azure CLI
+      az storage blob upload-batch \
         --account-name $STORAGE_ACCOUNT \
-        --container-name $CONTAINER_NAME \
-        --file android/app/build/outputs/apk/release/app-release-$(TIMESTAMP).apk \
-        --name react-native-builds/app-release-$(TIMESTAMP).apk \
-        --auth-mode login \
-        --overwrite
-  displayName: 'Upload APK to Azure Blob Storage'
+        --destination $CONTAINER_NAME/react-native-builds/ \
+        --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
+        --pattern '*.apk'  
+  displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
