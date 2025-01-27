@@ -21,25 +21,38 @@ steps:
     secureFile: 'my-upload-key.keystore'
   displayName: 'Download Keystore File'
 
-- task: InstallAppleCertificate@2 
+- task: DownloadSecureFile@1
   name: appleCertificate
-  displayName: Install Apple Certificate
   inputs:
-      certSecureFile: 'Dist_Certificates 2.p12'
-      # certPwd: '$(AppleCertificatePassword)'
-      keychain: 'temp'
-      deleteCert: true
-- task: InstallAppleProvisioningProfile@1
+    secureFile: 'Dist_Certificates 2.p12'
+  displayName: 'Download appleCertificate File'
+
+- task: DownloadSecureFile@1
   name: appleProvisioningProfile
-  displayName: 'Install Apple Provisioning Profile'
   inputs:
-      provisioningProfileLocation: 'secureFiles'
-      provProfileSecureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
-      removeProfile: true
-- task: CocoaPods@0
-  displayName: 'Install CocoaPods'
-  inputs:
-      workingDirectory: 'ios'
+    secureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
+  displayName: 'Download appleProvisioningProfile File'
+
+
+# - task: InstallAppleCertificate@2 
+#   name: appleCertificate
+#   displayName: Install Apple Certificate
+#   inputs:
+#       certSecureFile: 'Dist_Certificates 2.p12'
+#       # certPwd: '$(AppleCertificatePassword)'
+#       keychain: 'temp'
+#       deleteCert: true
+# - task: InstallAppleProvisioningProfile@1
+#   name: appleProvisioningProfile
+#   displayName: 'Install Apple Provisioning Profile'
+#   inputs:
+#       provisioningProfileLocation: 'secureFiles'
+#       provProfileSecureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
+#       removeProfile: true
+# - task: CocoaPods@0
+#   displayName: 'Install CocoaPods'
+#   inputs:
+#       workingDirectory: 'ios'
 
 - script: |
     echo Installing $(downloadKeystore.secureFilePath) to the trusted CA directory...
