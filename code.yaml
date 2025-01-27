@@ -21,27 +21,28 @@ steps:
     secureFile: 'my-upload-key.keystore'
   displayName: 'Download Keystore File'
 
-- task: DownloadSecureFile@1
-  name: appleCertificate
-  inputs:
-    secureFile: 'Dist_Certificates_2.p12'
-  displayName: 'Download appleCertificate File'
+# - task: DownloadSecureFile@1
+#   name: appleCertificate
+#   inputs:
+#     secureFile: 'Dist_Certificates_2.p12'
+#   displayName: 'Download appleCertificate File'
 
-- task: DownloadSecureFile@1
-  name: appleProvisioningProfile
-  inputs:
-    secureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
-  displayName: 'Download appleProvisioningProfile File'
+# - task: DownloadSecureFile@1
+#   name: appleProvisioningProfile
+#   inputs:
+#     secureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
+#   displayName: 'Download appleProvisioningProfile File'
 
 
 # - task: InstallAppleCertificate@2 
 #   name: appleCertificate
 #   displayName: Install Apple Certificate
 #   inputs:
-#       certSecureFile: 'Dist_Certificates 2.p12'
+#       certSecureFile: 'Dist_Certificates_2.p12'
 #       # certPwd: '$(AppleCertificatePassword)'
 #       keychain: 'temp'
 #       deleteCert: true
+
 # - task: InstallAppleProvisioningProfile@1
 #   name: appleProvisioningProfile
 #   displayName: 'Install Apple Provisioning Profile'
@@ -63,46 +64,46 @@ steps:
     pwd
   displayName: ' build'
 
-# - task: Gradle@3
-#   inputs:
-#     gradleWrapperFile: 'android/gradlew'
-#     workingDirectory: 'android/'
-#     options: '-PversionName=$(Build.BuildNumber) -PversionCode=$(Build.BuildId)'
-#     tasks: 'assembleRelease'
-#     publishJUnitResults: false
-#     javaHomeOption: 'JDKVersion'
-#     gradleOptions: '-Xmx3072m'
+- task: Gradle@3
+  inputs:
+    gradleWrapperFile: 'android/gradlew'
+    workingDirectory: 'android/'
+    options: '-PversionName=$(Build.BuildNumber) -PversionCode=$(Build.BuildId)'
+    tasks: 'assembleRelease'
+    publishJUnitResults: false
+    javaHomeOption: 'JDKVersion'
+    gradleOptions: '-Xmx3072m'
 
-# - task: AndroidSigning@3
-#   inputs:
-#     apkFiles: '**/*.apk'
-#     apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  
-#     apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
-#     apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
-#     apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
-#     zipalign: false
+- task: AndroidSigning@3
+  inputs:
+    apkFiles: '**/*.apk'
+    apksignerKeystoreFile: '$(MYAPP_UPLOAD_STORE_FILE)'  
+    apksignerKeystorePassword: '$(MYAPP_UPLOAD_STORE_PASSWORD)'
+    apksignerKeystoreAlias: '$(MYAPP_UPLOAD_KEY_ALIAS)'
+    apksignerKeyPassword: '$(MYAPP_UPLOAD_KEY_PASSWORD)'
+    zipalign: false
 
-# - task: PublishBuildArtifacts@1
-#   displayName: 'Publish APK to artifacts'
-#   inputs:
-#     PathtoPublish: 'android/app/build/outputs/apk/release'
-#     ArtifactName: 'android'
-#     publishLocation: 'Container'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish APK to artifacts'
+  inputs:
+    PathtoPublish: 'android/app/build/outputs/apk/release'
+    ArtifactName: 'android'
+    publishLocation: 'Container'
 
-# - task: AzureCLI@2
-#   inputs:
-#     azureSubscription: 'subscription'  
-#     scriptType: 'bash'
-#     scriptLocation: 'inlineScript'
-#     inlineScript: |
-#       # Check if the variables are set correctly
-#       echo "STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)"
-#       echo "CONTAINER_NAME: $(CONTAINER_NAME)"
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'subscription'  
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Check if the variables are set correctly
+      echo "STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)"
+      echo "CONTAINER_NAME: $(CONTAINER_NAME)"
 
-#       # Upload only .apk files to Azure Blob Storage using Azure CLI
-#       az storage blob upload-batch \
-#         --account-name $STORAGE_ACCOUNT \
-#         --destination $CONTAINER_NAME/react-native-builds/ \
-#         --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
-#         --pattern '*.apk'  
-#   displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
+      # Upload only .apk files to Azure Blob Storage using Azure CLI
+      az storage blob upload-batch \
+        --account-name $STORAGE_ACCOUNT \
+        --destination $CONTAINER_NAME/react-native-builds/ \
+        --source $(System.DefaultWorkingDirectory)/android/app/build/outputs/apk/release/ \
+        --pattern '*.apk'  
+  displayName: 'Upload APK to Azure Blob Storage using Azure CLI'
