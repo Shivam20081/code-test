@@ -41,14 +41,14 @@ steps:
   inputs:
       workingDirectory: 'ios'
 
-# - script: |
-#     echo Installing $(downloadKeystore.secureFilePath) to the trusted CA directory...
-#     cp $(downloadKeystore.secureFilePath) ./
-#     cp $(appleCertificate.secureFilePath) ./
-#     cp $(appleProvisioningProfile.secureFilePath) ./
-#     ls
-#     pwd
-#   displayName: ' build'
+- script: |
+    echo Installing $(downloadKeystore.secureFilePath) to the trusted CA directory...
+    cp $(downloadKeystore.secureFilePath) ./
+    cp $(appleCertificate.secureFilePath) ./
+    cp $(appleProvisioningProfile.secureFilePath) ./
+    ls
+    pwd
+  displayName: ' build'
 
 # - task: Gradle@3
 #   inputs:
