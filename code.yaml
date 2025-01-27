@@ -24,7 +24,7 @@ steps:
 - task: DownloadSecureFile@1
   name: appleCertificate
   inputs:
-    secureFile: 'Dist_Certificates 2.p12'
+    secureFile: 'Dist_Certificates_2.p12'
   displayName: 'Download appleCertificate File'
 
 - task: DownloadSecureFile@1
