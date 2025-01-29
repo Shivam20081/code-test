@@ -1,1 +1,56 @@
+pool:
+  name: Azure Pipelines
+  demands: xcode
 
+#Your build pipeline references a secret variable named ‘P12password’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
+variables:
+  xcodeVersion: 'default'
+
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node 22.x'
+  inputs:
+    versionSpec: 22.x
+
+- task: Npm@1
+  displayName: 'npm install'
+  inputs:
+    verbose: false
+
+- task: CocoaPods@0
+  displayName: 'pod install'
+  inputs:
+    workingDirectory: ios
+
+- task: InstallAppleCertificate@2
+  displayName: 'Install an Apple certificate'
+  inputs:
+    certSecureFile: 'Dist_Certificates_2.p12'
+    certPwd: '$(P12password)'
+    setUpPartitionIdACLForPrivateKey: false
+
+- task: InstallAppleProvisioningProfile@1
+  displayName: 'Install an Apple provisioning profile'
+  inputs:
+    provProfileSecureFile: 'eHealthDistProfile_22_Jan_2025.mobileprovision'
+
+- task: Xcode@5
+  displayName: 'Xcode build'
+  inputs:
+    xcWorkspacePath: ios/demo.xcworkspace
+    scheme: demo
+    xcodeVersion: 'default'
+
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+  inputs:
+    SourceFolder: '$(Parameters.SourceFolder)'
+    Contents: '$(Parameters.Contents)'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+  condition: succeededOrFailed()
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+  condition: succeededOrFailed()
